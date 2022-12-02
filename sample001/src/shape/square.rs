@@ -1,7 +1,7 @@
 use crate::shape::Shape;
-pub(crate) struct Square{
-    pub length : f64,
-    pub name : String,
+pub struct Square{
+    length : f64,
+    name : String,
 }
 
 impl Shape for Square{
