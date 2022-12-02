@@ -9,6 +9,6 @@ fn main() {
     shapes.push(Box::new(shape::square::Square::new()));
     shapes.push(Box::new(shape::rectangle::Rectangle::new()));
     for shape in &shapes{
-        println!("The area of shape is {}", shape.area());
+        println!("The area of {} is {}", shape.get_name(), shape.area());
     }
 }

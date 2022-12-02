@@ -13,6 +13,10 @@ impl Shape for Rectangle{
     fn area(&self)->f64{
         self.width * self.height
     }
+
+    fn get_name(&self) -> &str {
+        "rectangle"
+    }
 }
 
 #[test]
