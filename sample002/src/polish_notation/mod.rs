@@ -8,14 +8,14 @@ enum PolishNotationNode{
     Operator(PolishNotationOperator),
 }
 
-struct PolishNotation{
+pub struct PolishNotation{
     node : PolishNotationNode,
     left : Box<Option<PolishNotation>>,
     right: Box<Option<PolishNotation>>,
 }
 
 impl PolishNotation{
-    fn new(notation_str: String) -> Self{
+    pub fn new(notation_str: String) -> Self{
         Self::new_sub(&mut notation_str.split_whitespace().rev().collect()).unwrap()
     }
 
@@ -40,7 +40,7 @@ impl PolishNotation{
         Some(PolishNotation{node, left : Box::new(Self::new_sub(notation_str_vec)), right : Box::new(Self::new_sub(notation_str_vec))})
     }
 
-    fn calc(&self)->i32{
+    pub fn calc(&self)->i32{
         match &self.node{
             PolishNotationNode::Numeric(number) => *number,
             PolishNotationNode::Operator(operator) =>{
