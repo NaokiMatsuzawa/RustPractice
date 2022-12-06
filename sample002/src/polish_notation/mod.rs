@@ -18,10 +18,6 @@ impl PolishNotation{
     }
 }
 
-fn calc(notation_str: String) -> i32{
-    0
-}
-
 #[test]
 fn test_simple_add(){
     assert_eq!(PolishNotation::new("+ 1 1".to_string()).calc(), 2);// 1 + 1 = 2
