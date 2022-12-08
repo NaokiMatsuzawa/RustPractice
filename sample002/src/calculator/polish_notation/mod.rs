@@ -19,9 +19,9 @@ pub struct PolishNotation{
 }
 
 impl PolishNotation{
-    pub fn calc_from_str(notation_str: &str) -> Result<i32, String>{
-        let binding = notation_str.to_string();
-        let mut str_vec = binding.split_whitespace().rev().collect();
+    pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
+        let formula_string = formula.to_string();
+        let mut str_vec = formula_string.split_whitespace().rev().collect();
         Self::new(&mut str_vec).calc()
     }
 
@@ -78,32 +78,32 @@ impl PolishNotation{
 
 #[test]
 fn test_invalid_characters(){
-    assert_eq!(PolishNotation::calc_from_str("abc").unwrap_err(), "Invalid Characters");
-    assert_eq!(PolishNotation::calc_from_str("+ a 1").unwrap_err(), "Invalid Characters");
-    assert_eq!(PolishNotation::calc_from_str("+ 1 a").unwrap_err(), "Invalid Characters");
-    assert_eq!(PolishNotation::calc_from_str("+ a").unwrap_err(), "Invalid Characters");    
-    assert_eq!(PolishNotation::calc_from_str("+ a b").unwrap_err(), "Invalid Characters");
+    assert_eq!(PolishNotation::calc_from_formula("abc").unwrap_err(), "Invalid Characters");
+    assert_eq!(PolishNotation::calc_from_formula("+ a 1").unwrap_err(), "Invalid Characters");
+    assert_eq!(PolishNotation::calc_from_formula("+ 1 a").unwrap_err(), "Invalid Characters");
+    assert_eq!(PolishNotation::calc_from_formula("+ a").unwrap_err(), "Invalid Characters");
+    assert_eq!(PolishNotation::calc_from_formula("+ a b").unwrap_err(), "Invalid Characters");
 }
 
 #[test]
 fn test_formula_error(){
-    assert_eq!(PolishNotation::calc_from_str("+").unwrap_err(), "Formula Error");
-    assert_eq!(PolishNotation::calc_from_str("+ 1").unwrap_err(), "Formula Error");
+    assert_eq!(PolishNotation::calc_from_formula("+").unwrap_err(), "Formula Error");
+    assert_eq!(PolishNotation::calc_from_formula("+ 1").unwrap_err(), "Formula Error");
 }
 
 #[test]
 fn test_numeric_only(){
-    assert_eq!(PolishNotation::calc_from_str("1").unwrap(), 1);
+    assert_eq!(PolishNotation::calc_from_formula("1").unwrap(), 1);
 }
 
 #[test]
 fn test_simple_add(){
-    assert_eq!(PolishNotation::calc_from_str("+ 1 1").unwrap(), 2);// 1 + 1 = 2
-    assert_eq!(PolishNotation::calc_from_str("+ 10 990").unwrap(), 1000); //10 + 990 = 1000
+    assert_eq!(PolishNotation::calc_from_formula("+ 1 1").unwrap(), 2);// 1 + 1 = 2
+    assert_eq!(PolishNotation::calc_from_formula("+ 10 990").unwrap(), 1000); //10 + 990 = 1000
 }
 
 #[test]
 fn test_simple_sub(){
-    assert_eq!(PolishNotation::calc_from_str("- 1 1").unwrap(), 0); //1 - 1 = 0
-    assert_eq!(PolishNotation::calc_from_str("- 10 100").unwrap(), -90); //10 - 100 = -90
+    assert_eq!(PolishNotation::calc_from_formula("- 1 1").unwrap(), 0); //1 - 1 = 0
+    assert_eq!(PolishNotation::calc_from_formula("- 10 100").unwrap(), -90); //10 - 100 = -90
 }
