@@ -20,14 +20,12 @@ pub struct PolishNotation{
 
 impl PolishNotation{
     pub fn calc_from_str(notation_str: &str) -> Result<i32, String>{
-        Self::new(notation_str.to_string()).calc()
+        let binding = notation_str.to_string();
+        let mut str_vec = binding.split_whitespace().rev().collect();
+        Self::new(&mut str_vec).calc()
     }
 
-    fn new(notation_str: String) -> Self{
-        Self::new_sub(&mut notation_str.split_whitespace().rev().collect())
-    }
-
-    fn new_sub(notation_str_vec : &mut Vec<&str>) -> Self{
+    fn new(notation_str_vec : &mut Vec<&str>) -> Self{
         let str_option = notation_str_vec.pop();
         if str_option == None{
             return PolishNotation{node : PolishNotationNode::Exception(ExceptionType::FormulaError)};
@@ -46,7 +44,7 @@ impl PolishNotation{
                 return PolishNotation{node : PolishNotationNode::Exception(ExceptionType::InvalidCharacters)};
             }
         }
-        let node = PolishNotationNode::Operator(operator, Box::new(Self::new_sub(notation_str_vec)), Box::new(Self::new_sub(notation_str_vec)));
+        let node = PolishNotationNode::Operator(operator, Box::new(Self::new(notation_str_vec)), Box::new(Self::new(notation_str_vec)));
         PolishNotation{node}
     }
 
