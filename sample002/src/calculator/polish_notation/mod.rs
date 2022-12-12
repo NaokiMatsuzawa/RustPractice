@@ -1,5 +1,6 @@
-mod polish_base;
+mod polish_notation;
+mod operator; // 本当はpolish_notationしか見えなくしたい
 
 pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
-    polish_base::after_change_name::calc_from_formula(formula)
+    polish_notation::calc_from_formula(formula)
 }
