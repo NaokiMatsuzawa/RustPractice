@@ -1,5 +1,5 @@
 pub trait PolishNotation{
-    fn new(notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized;
+//    fn new(notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized;
     fn calc(&self) -> Result<i32, String>;
 }
 
@@ -14,18 +14,15 @@ struct PolishError{
 struct PolishNumeric{
     value : i32
 }
-struct PolishOperationAdd{
-    left : Box<dyn PolishNotation>,
-    right: Box<dyn PolishNotation>
-}
 
-struct PolishOperationSub{
+struct PolishOperation{
     left : Box<dyn PolishNotation>,
-    right: Box<dyn PolishNotation>
+    right: Box<dyn PolishNotation>,
+    operator : Box<dyn Operator>
 }
 
 pub mod after_change_name{
-    use super::{PolishNotation, PolishNumeric, PolishOperationAdd, PolishOperationSub, PolishError};
+    use super::{PolishNotation, PolishNumeric, PolishError, OperatorType, PolishOperation};
 
     pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
         let formula_string = formula.to_string();
@@ -43,32 +40,29 @@ pub mod after_change_name{
             return Box::new(PolishNumeric{value});
         }
 
-        //let operator : PolishNotationOperator;
+        let operator_type : OperatorType;
         match str{
-            "+" => Box::new(PolishOperationAdd::new(notation_str_vec)),
-            "-" => Box::new(PolishOperationSub::new(notation_str_vec)),
+            "+" => {
+                operator_type = OperatorType::Add;
+            }
+            "-" => {
+                operator_type = OperatorType::Sub;
+            } 
             _ => {
-                Box::new(PolishError{error_type : super::ErrorType::InvalidCharacters})
+                return Box::new(PolishError{error_type : super::ErrorType::InvalidCharacters});
             }
         }
+        Box::new(PolishOperation::new(notation_str_vec, operator_type))
     }
 }
 
 impl PolishNotation for PolishNumeric{
-    fn new(_notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized {
-        panic!("unexpected call");
-    }
-
     fn calc(&self) -> Result<i32, String> {
         Ok(self.value)
     }
 }
 
 impl PolishNotation for PolishError{
-    fn new(_notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized {
-        todo!()
-    }
-
     fn calc(&self) -> Result<i32, String> {
         match self.error_type{
             ErrorType::InvalidCharacters => Err("Invalid Characters".to_string()),
@@ -77,37 +71,72 @@ impl PolishNotation for PolishError{
     }
 }
 
-impl PolishNotation for PolishOperationAdd{
-    fn new(notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized {
+impl PolishOperation{
+    fn new(notation_str_vec : &mut Vec<&str>, operator_type : OperatorType) -> Self where Self : Sized {
         let left = after_change_name::polish_notation_factory(notation_str_vec);
         let right = after_change_name::polish_notation_factory(notation_str_vec);
-        PolishOperationAdd { left, right }
+        let operator = after_think_name::factory(operator_type);
+        PolishOperation { left, right , operator}
     }
+}
 
+impl PolishNotation for PolishOperation{
     fn calc(&self) -> Result<i32, String> {
         match (self.left.calc(), self.right.calc()){
-            (Ok(left_value), Ok(right_value)) => Ok(left_value + right_value),
+            (Ok(left_value), Ok(right_value)) => Ok(self.operator.calc(left_value, right_value)),
             (Err(e), _) => Err(e),
             (_, Err(e)) => Err(e)
         }
     }
 }
 
-impl PolishNotation for PolishOperationSub{
-    fn new(notation_str_vec : &mut Vec<&str>) -> Self where Self : Sized {
-        let left = after_change_name::polish_notation_factory(notation_str_vec);
-        let right = after_change_name::polish_notation_factory(notation_str_vec);
-        PolishOperationSub { left, right }
+pub trait Operator{
+    fn new()-> Self where Self : Sized;
+    fn calc(&self, left : i32, right : i32)-> i32;
+}
+
+pub enum OperatorType{
+    Add,
+    Sub,
+}
+
+struct OperatorAdd;
+struct OperatorSub;
+
+impl Operator for OperatorAdd{
+    fn calc(&self, left : i32, right : i32)-> i32{
+        left + right
     }
 
-    fn calc(&self) -> Result<i32, String> {
-        match (self.left.calc(), self.right.calc()){
-            (Ok(left_value), Ok(right_value)) => Ok(left_value - right_value),
-            (Err(e), _) => Err(e),
-            (_, Err(e)) => Err(e)
+    fn new()-> Self where Self : Sized {
+        OperatorAdd{}
+    }
+}
+
+impl Operator for OperatorSub{
+    fn calc(&self, left : i32, right : i32)-> i32{
+        left - right
+    }
+
+    fn new()-> Self where Self : Sized {
+        OperatorSub{}
+    }
+}
+
+
+pub mod after_think_name{
+    use super::{Operator, OperatorType, OperatorAdd, OperatorSub};
+
+    pub(crate) fn factory(operator_type: OperatorType) -> Box<dyn Operator>{
+        match operator_type{
+            OperatorType::Add => Box::new(OperatorAdd::new()),
+            OperatorType::Sub => Box::new(OperatorSub::new())
         }
     }
 }
+
+
+
 #[test]
 fn test_invalid_characters(){
     assert_eq!(after_change_name::calc_from_formula("abc").unwrap_err(), "Invalid Characters");
