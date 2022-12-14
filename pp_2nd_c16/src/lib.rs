@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use serde_xml_rs::{from_str, to_string};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 struct PersonalData{
@@ -9,7 +8,7 @@ struct PersonalData{
     work_experience : Vec<String>,
 }
 
-type PersonalDataBase = HashMap<String, PersonalData>;
+//type PersonalDataBase = HashMap<String, PersonalData>;
 
 #[test]
 fn test_000(){
@@ -29,7 +28,9 @@ fn test_json(){
                                           address: "Tokyo".to_string(),
                                           work_experience : vec!["Dei INC., Tokyo January 2020 - present".to_string(), "JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019".to_string()]};
     let json = serde_json::to_string(&data).unwrap();
-    assert_eq!(json, r#"{"name":"Tom","address":"Tokyo","work_experience":["Dei INC., Tokyo January 2020 - present","JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019"]}"#);
+    assert_eq!(json, r#"{"name":"Tom","#.to_owned() +
+                     r#""address":"Tokyo","# +
+                     r#""work_experience":["Dei INC., Tokyo January 2020 - present","JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019"]}"#);
     assert_eq!(serde_json::from_str::<PersonalData>(&json).unwrap(), data);
 }
 
@@ -39,6 +40,9 @@ fn test_xml(){
                                           address: "Tokyo".to_string(),
                                           work_experience : vec!["Dei INC., Tokyo January 2020 - present".to_string(), "JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019".to_string()]};
     let xml = serde_xml_rs::to_string(&data).unwrap();
-    assert_eq!(xml, r#"<?xml version="1.0" encoding="UTF-8"?><PersonalData><name>Tom</name><address>Tokyo</address><work_experience>Dei INC., Tokyo January 2020 - present</work_experience><work_experience>JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019</work_experience></PersonalData>"#);
+    assert_eq!(xml, r#"<?xml version="1.0" encoding="UTF-8"?>"#.to_owned() +
+                    r#"<PersonalData><name>Tom</name>"# +
+                    r#"<address>Tokyo</address>"# +
+                    r#"<work_experience>Dei INC., Tokyo January 2020 - present</work_experience><work_experience>JAPAN OFFICE LTD., Kanagawa April 2018 - December 2019</work_experience></PersonalData>"#);
     assert_eq!(serde_xml_rs::from_str::<PersonalData>(&xml).unwrap(), data);
 }
