@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use serde_xml_rs::{from_str, to_string};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 struct PersonalData{
@@ -30,5 +31,7 @@ fn test_json(){
 #[test]
 fn test_xml(){
     let data = PersonalData{name: "Tom".to_string(), address: "Tokyo".to_string()};
-    let json = serde_json::to_string(&data).unwrap();
+    let xml = serde_xml_rs::to_string(&data).unwrap();
+    assert_eq!(xml, r#"<?xml version="1.0" encoding="UTF-8"?><PersonalData><name>Tom</name><address>Tokyo</address></PersonalData>"#);
+    assert_eq!(serde_xml_rs::from_str::<PersonalData>(&xml).unwrap(), data);
 }
