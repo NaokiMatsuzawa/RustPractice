@@ -1,5 +1,3 @@
-test_hello/
-test_mandelbrot/
-test_quickreplace/
-test-actix-gcd/
+test*
 rust_playground/
+*/target
