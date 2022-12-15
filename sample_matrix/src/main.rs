@@ -1,37 +1,74 @@
-struct Matrix<T>{
-    width : usize,
-    elements: Vec<T>,
+#[derive(Debug, Clone, Copy, PartialEq)]
+///数値T型のH行W列の行列を表す構造体
+struct Matrix<T, const H : usize, const W : usize>{
+    elements: [[T;W]; H]
 }
 
-impl<T: Default + Copy> Matrix<T>{
-    fn new(width: usize, height: usize) -> Matrix<T>{
-        Matrix { 
-            width,
-            elements : vec![T::default(); width * height] 
+impl<T : Default + Copy, const H : usize, const W : usize> Matrix<T, H, W>{
+    fn new() -> Matrix<T, H, W>{
+        Matrix{
+            elements : [[T::default(); W]; H]
         }
     }
 }
 
-impl<T> std::ops::Index<usize> for Matrix<T> {
+impl<T, const H : usize, const W : usize> std::ops::Index<usize> for Matrix<T, H, W> {
     type Output = [T];
     fn index(&self, row: usize) -> &[T]{
-        let start = row * self.width;
-        &self.elements[start..start+self.width]
+        &self.elements[row]
     }
 }
 
-impl<T> std::ops::IndexMut<usize> for Matrix<T>{
+impl<T, const H : usize, const W : usize> std::ops::IndexMut<usize> for Matrix<T, H, W>{
     fn index_mut(&mut self, row: usize) -> &mut [T]{
-        let start = row * self.width;
-        &mut self.elements[start..start+self.width]
+        &mut self.elements[row]
+    }
+}
+
+impl<T : Default + Copy + std::ops::Add<Output = T>, const H : usize, const W : usize> std::ops::Add for Matrix<T, H, W>{
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self{
+        let mut return_matrix = Matrix::<T, H, W>::new();
+        for i in 0..H{
+            for j in 0..W{
+                return_matrix[i][j] = self[i][j] + rhs[i][j];
+            }
+        }
+        return_matrix
     }
 }
 
 fn main() {
-    let mut matrix = Matrix::<u32>::new(2,3);
+    let mut matrix = Matrix::<u32, 2, 3>::new();
     matrix[0][0] = 1;
+    println!("{:?}", matrix);
+}
 
-    let mut matrix2 = {{1,2,3},
-                        {4,5,6},
-                        {7,8,9}};
+#[test]
+fn add_test(){
+    let mut matrix_0 = Matrix::<u32, 2, 3>::new();
+    matrix_0[0][0] = 1;
+    matrix_0[0][1] = 1;
+    matrix_0[0][2] = 1;
+    matrix_0[1][0] = 1;
+    matrix_0[1][1] = 1;
+    matrix_0[1][2] = 1;
+
+    let mut matrix_1 = Matrix::<u32, 2, 3>::new();
+    matrix_1[0][0] = 0;
+    matrix_1[0][1] = 1;
+    matrix_1[0][2] = 2;
+    matrix_1[1][0] = 3;
+    matrix_1[1][1] = 4;
+    matrix_1[1][2] = 5;
+
+    let mut matrix_2 = Matrix::<u32, 2, 3>::new();
+    matrix_2[0][0] = 1;
+    matrix_2[0][1] = 2;
+    matrix_2[0][2] = 3;
+    matrix_2[1][0] = 4;
+    matrix_2[1][1] = 5;
+    matrix_2[1][2] = 6;
+
+    assert_eq!(matrix_0 + matrix_1, matrix_2);
 }
