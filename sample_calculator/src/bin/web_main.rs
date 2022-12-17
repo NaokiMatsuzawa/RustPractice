@@ -1,6 +1,15 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
 use serde::Deserialize;
 
+const CALCULATOR_FORM : &str = 
+r#"
+<title>Calculator</title>
+<form action="/calc" method="post">
+<input type="text" name="formula"/>
+<button type="submit"> Compute Formula</button>
+</form>
+"#;
+
 #[derive(Deserialize)]
 struct FormulaParameters{
     formula: String,
@@ -21,15 +30,7 @@ fn main(){
 fn get_index() -> HttpResponse{
     HttpResponse::Ok()
         .content_type("text/html")
-        .body(
-            r#"
-                <title>Calculator</title>
-                <form action="/calc" method="post">
-                <input type="text" name="formula"/>
-                <button type="submit"> Compute Formula</button>
-                </form>
-            "#,
-        )
+        .body(CALCULATOR_FORM)
 }
 
 
@@ -41,7 +42,12 @@ fn post_formula(form: web::Form<FormulaParameters>) -> HttpResponse{
         Err(msg) => format!("Error: {}", msg),
     };
 
+    let body_str = format!(
+        "{}\n{}"
+    , CALCULATOR_FORM, response
+    );
+
     HttpResponse::Ok()
         .content_type("text/html")
-        .body(response)
+        .body(body_str)
 }
