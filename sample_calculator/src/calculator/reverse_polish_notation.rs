@@ -91,9 +91,21 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn ReversePolishFo
             "+" => {
                 if node_deque.len() < 2{
                     return Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError));
-                    //return Box::new(ReversePolishError::new(ReversePolishErrorType::InvalidCharacters));
                 }
-                let new_node = Box::new(ReversePolishOperation::new(node_deque.pop_front().unwrap(), node_deque.pop_front().unwrap(), OperatorType::Add));
+                let right = node_deque.pop_back().unwrap();
+                let left = node_deque.pop_back().unwrap();
+                let new_node = Box::new(ReversePolishOperation::new(left, right, OperatorType::Add));
+                node_deque.push_back(new_node);
+                continue;
+            },
+            
+            "-" => {
+                if node_deque.len() < 2{
+                    return Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError));
+                }
+                let right = node_deque.pop_back().unwrap();
+                let left = node_deque.pop_back().unwrap();
+                let new_node = Box::new(ReversePolishOperation::new(left, right, OperatorType::Sub));
                 node_deque.push_back(new_node);
                 continue;
             },
