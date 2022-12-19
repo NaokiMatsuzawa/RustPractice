@@ -1,16 +1,119 @@
+use std::collections::VecDeque;
+
+use super::operator::*;
+
+pub trait ReversePolishFormulaNode{
+    fn calc(&self) -> Result<i32, String>;
+}
+
+enum ReversePolishErrorType{
+    InvalidCharacters,
+    FormulaError,
+}
+struct ReversePolishError{
+    error: ReversePolishErrorType,
+}
+
+impl ReversePolishError{
+    fn new(error: ReversePolishErrorType) -> Self{
+        ReversePolishError { error }
+    }
+}
+
+impl ReversePolishFormulaNode for ReversePolishError{
+    fn calc(&self) -> Result<i32, String> {
+        match self.error{
+            ReversePolishErrorType::FormulaError => Err("Formula Error".to_string()),
+            ReversePolishErrorType::InvalidCharacters => Err("Invalid Characters".to_string()),
+        }
+    }
+}
+
+struct ReversePolishNumericNode{
+    value : i32,
+}
+
+impl ReversePolishNumericNode{
+    fn new(value : i32) -> Self{
+        ReversePolishNumericNode { value }
+    }
+}
+
+impl ReversePolishFormulaNode for ReversePolishNumericNode{
+    fn calc(&self) -> Result<i32, String>{
+        Ok(self.value)
+    }
+}
+
+struct ReversePolishOperation{
+    left : Box<dyn ReversePolishFormulaNode>,
+    right: Box<dyn ReversePolishFormulaNode>,
+    operator : Box<dyn Operator>
+}
+
+impl ReversePolishOperation{
+    fn new(left : Box<dyn ReversePolishFormulaNode>, right: Box<dyn ReversePolishFormulaNode>, operator_type: OperatorType) -> Self {
+        ReversePolishOperation{
+            left,
+            right,
+            operator : operator_factory(operator_type),
+        }
+    }
+}
+
+impl ReversePolishFormulaNode for ReversePolishOperation{
+    fn calc(&self) -> Result<i32, String> {
+        let left_result = self.left.calc();
+        let right_result = self.right.calc();
+        match (left_result, right_result) {
+            (Err(str), _) => Err(str),
+            (_, Err(str)) => Err(str),
+            (Ok(left_value), Ok(right_value)) => Ok(self.operator.calc(left_value, right_value)),
+        }
+    }
+}
 
 pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
-    todo!();
+    let binding = formula.to_string();
+    let mut parsed_formula : Vec<&str> = binding.split_whitespace().rev().collect();
+    formula_factory(&mut parsed_formula).calc()
+}
+
+pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn ReversePolishFormulaNode>{
+    let mut node_deque = VecDeque::<Box<dyn ReversePolishFormulaNode>>::new();
+    while let Some(str) = formula.pop(){
+        if let Ok(value) = i32::from_str_radix(str, 10){
+            node_deque.push_back(Box::new(ReversePolishNumericNode::new(value)));
+            continue;
+        }
+
+        match str{
+            "+" => {
+                if node_deque.len() < 2{
+                    return Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError));
+                    //return Box::new(ReversePolishError::new(ReversePolishErrorType::InvalidCharacters));
+                }
+                let new_node = Box::new(ReversePolishOperation::new(node_deque.pop_front().unwrap(), node_deque.pop_front().unwrap(), OperatorType::Add));
+                node_deque.push_back(new_node);
+                continue;
+            },
+            _ => return Box::new(ReversePolishError::new(ReversePolishErrorType::InvalidCharacters)),
+        }
+    }
+    match node_deque.len() {
+        1 => node_deque.pop_front().unwrap(),
+        _ => Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError)),
+    }
 }
 
 
 #[test]
 fn test_invalid_characters(){
     assert_eq!(calc_from_formula("abc").unwrap_err(), "Invalid Characters");
-    assert_eq!(calc_from_formula("+ a 1").unwrap_err(), "Invalid Characters");
-    assert_eq!(calc_from_formula("+ 1 a").unwrap_err(), "Invalid Characters");
-    assert_eq!(calc_from_formula("+ a").unwrap_err(), "Invalid Characters");
-    assert_eq!(calc_from_formula("+ a b").unwrap_err(), "Invalid Characters");
+    assert_eq!(calc_from_formula("a 1 +").unwrap_err(), "Invalid Characters");
+    assert_eq!(calc_from_formula("1 a +").unwrap_err(), "Invalid Characters");
+    assert_eq!(calc_from_formula("a +").unwrap_err(), "Invalid Characters");
+    assert_eq!(calc_from_formula("a b +").unwrap_err(), "Invalid Characters");
 }
 
 #[test]
