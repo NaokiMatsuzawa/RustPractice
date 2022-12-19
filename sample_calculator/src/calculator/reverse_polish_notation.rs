@@ -17,6 +17,9 @@ fn test_invalid_characters(){
 fn test_formula_error(){
     assert_eq!(calc_from_formula("+").unwrap_err(), "Formula Error");
     assert_eq!(calc_from_formula("+ 1").unwrap_err(), "Formula Error");
+    assert_eq!(calc_from_formula("1 +").unwrap_err(), "Formula Error");
+    assert_eq!(calc_from_formula("1 1 + 1").unwrap_err(), "Formula Error");
+    assert_eq!(calc_from_formula("1 1 1 +").unwrap_err(), "Formula Error");
 }
 
 #[test]
@@ -36,3 +39,9 @@ fn test_simple_sub(){
     assert_eq!(calc_from_formula("10 100 -").unwrap(), -90); //10 - 100 = -90
 }
 
+#[test]
+fn test_complex(){
+    assert_eq!(calc_from_formula("1 1 + 3 -").unwrap(), -1); // 1 + 1 - 3
+    assert_eq!(calc_from_formula("1 1 3 + -").unwrap(), -3); // 1 - (1 + 3)
+    
+}
