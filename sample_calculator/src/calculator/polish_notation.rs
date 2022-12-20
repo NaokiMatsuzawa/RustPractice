@@ -1,41 +1,12 @@
 use super::operator::*;
-
-pub trait PolishNotation{
-    fn calc(&self) -> Result<i32, String>;
-}
-
-enum ErrorType{
-    InvalidCharacters,
-    FormulaError
-}
-struct PolishError{
-    error_type : ErrorType,
-}
-
-struct PolishNumeric{
-    value : i32
-}
+use super::formula_node::*;
 
 struct PolishOperation{
-    left : Box<dyn PolishNotation>,
-    right: Box<dyn PolishNotation>,
+    left : Box<dyn FormulaNode>,
+    right: Box<dyn FormulaNode>,
     operator : Box<dyn Operator>
 }
 
-impl PolishNotation for PolishNumeric{
-    fn calc(&self) -> Result<i32, String> {
-        Ok(self.value)
-    }
-}
-
-impl PolishNotation for PolishError{
-    fn calc(&self) -> Result<i32, String> {
-        match self.error_type{
-            ErrorType::InvalidCharacters => Err("Invalid Characters".to_string()),
-            ErrorType::FormulaError => Err("Formula Error".to_string())
-        }
-    }
-}
 
 impl PolishOperation{
     fn new(notation_str_vec : &mut Vec<&str>, operator_type : OperatorType) -> Self where Self : Sized {
@@ -46,7 +17,7 @@ impl PolishOperation{
     }
 }
 
-impl PolishNotation for PolishOperation{
+impl FormulaNode for PolishOperation{
     fn calc(&self) -> Result<i32, String> {
         match (self.left.calc(), self.right.calc()){
             (Ok(left_value), Ok(right_value)) => Ok(self.operator.calc(left_value, right_value)),
@@ -56,21 +27,20 @@ impl PolishNotation for PolishOperation{
     }
 }
 
-
 pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
     let formula_string = formula.to_string();
     let mut str_vec = formula_string.split_whitespace().rev().collect();
     polish_notation_factory(&mut str_vec).calc()
 }
 
-pub(crate) fn polish_notation_factory(notation_str_vec : &mut Vec<&str>) -> Box<dyn PolishNotation>{
+pub(crate) fn polish_notation_factory(notation_str_vec : &mut Vec<&str>) -> Box<dyn FormulaNode>{
     let str_option = notation_str_vec.pop();
     if str_option == None{
-        return Box::new(PolishError{error_type : ErrorType::FormulaError});
+        return Box::new(FormulaErrorNode::new(ErrorType::FormulaError));
     }
     let str = str_option.unwrap();
     if let Ok(value) = i32::from_str_radix(str, 10){
-        return Box::new(PolishNumeric{value});
+        return Box::new(FormulaNumericNode::new(value));
     }
 
     let operator_type : OperatorType;
@@ -82,7 +52,7 @@ pub(crate) fn polish_notation_factory(notation_str_vec : &mut Vec<&str>) -> Box<
             operator_type = OperatorType::Sub;
         } 
         _ => {
-            return Box::new(PolishError{error_type : ErrorType::InvalidCharacters});
+            return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters));
         }
     }
     Box::new(PolishOperation::new(notation_str_vec, operator_type))

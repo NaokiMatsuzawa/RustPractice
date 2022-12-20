@@ -1,77 +1,7 @@
 use std::collections::VecDeque;
 
 use super::operator::*;
-
-pub trait ReversePolishFormulaNode{
-    fn calc(&self) -> Result<i32, String>;
-}
-
-enum ReversePolishErrorType{
-    InvalidCharacters,
-    FormulaError,
-}
-struct ReversePolishError{
-    error: ReversePolishErrorType,
-}
-
-impl ReversePolishError{
-    fn new(error: ReversePolishErrorType) -> Self{
-        ReversePolishError { error }
-    }
-}
-
-impl ReversePolishFormulaNode for ReversePolishError{
-    fn calc(&self) -> Result<i32, String> {
-        match self.error{
-            ReversePolishErrorType::FormulaError => Err("Formula Error".to_string()),
-            ReversePolishErrorType::InvalidCharacters => Err("Invalid Characters".to_string()),
-        }
-    }
-}
-
-struct ReversePolishNumericNode{
-    value : i32,
-}
-
-impl ReversePolishNumericNode{
-    fn new(value : i32) -> Self{
-        ReversePolishNumericNode { value }
-    }
-}
-
-impl ReversePolishFormulaNode for ReversePolishNumericNode{
-    fn calc(&self) -> Result<i32, String>{
-        Ok(self.value)
-    }
-}
-
-struct ReversePolishOperation{
-    left : Box<dyn ReversePolishFormulaNode>,
-    right: Box<dyn ReversePolishFormulaNode>,
-    operator : Box<dyn Operator>
-}
-
-impl ReversePolishOperation{
-    fn new(left : Box<dyn ReversePolishFormulaNode>, right: Box<dyn ReversePolishFormulaNode>, operator_type: OperatorType) -> Self {
-        ReversePolishOperation{
-            left,
-            right,
-            operator : operator_factory(operator_type),
-        }
-    }
-}
-
-impl ReversePolishFormulaNode for ReversePolishOperation{
-    fn calc(&self) -> Result<i32, String> {
-        let left_result = self.left.calc();
-        let right_result = self.right.calc();
-        match (left_result, right_result) {
-            (Err(str), _) => Err(str),
-            (_, Err(str)) => Err(str),
-            (Ok(left_value), Ok(right_value)) => Ok(self.operator.calc(left_value, right_value)),
-        }
-    }
-}
+use super::formula_node::*;
 
 pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
     let binding = formula.to_string();
@@ -79,11 +9,11 @@ pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
     formula_factory(&mut parsed_formula).calc()
 }
 
-pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn ReversePolishFormulaNode>{
-    let mut node_deque = VecDeque::<Box<dyn ReversePolishFormulaNode>>::new();
+pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn FormulaNode>{
+    let mut node_deque = VecDeque::<Box<dyn FormulaNode>>::new();
     while let Some(str) = formula.pop(){
         if let Ok(value) = i32::from_str_radix(str, 10){
-            node_deque.push_back(Box::new(ReversePolishNumericNode::new(value)));
+            node_deque.push_back(Box::new(FormulaNumericNode::new(value)));
             continue;
         }
 
@@ -94,10 +24,10 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn ReversePolishFo
         };
 
         match operator_type{
-            OperatorType::Error => return Box::new(ReversePolishError::new(ReversePolishErrorType::InvalidCharacters)),
+            OperatorType::Error => return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters)),
             _ =>{
                 if node_deque.len() < 2{
-                    return Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError));
+                    return Box::new(FormulaErrorNode::new(ErrorType::FormulaError));
                 }
                 let right = node_deque.pop_back().unwrap();
                 let left = node_deque.pop_back().unwrap();
@@ -109,7 +39,7 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn ReversePolishFo
     }
     match node_deque.len() {
         1 => node_deque.pop_front().unwrap(),
-        _ => Box::new(ReversePolishError::new(ReversePolishErrorType::FormulaError)),
+        _ => Box::new(FormulaErrorNode::new(ErrorType::FormulaError)),
     }
 }
 
