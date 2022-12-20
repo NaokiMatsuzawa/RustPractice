@@ -6,6 +6,7 @@ pub trait Operator{
 pub enum OperatorType{
     Add,
     Sub,
+    Error,
 }
 
 struct OperatorAdd;
@@ -35,6 +36,7 @@ impl Operator for OperatorSub{
 pub(crate) fn operator_factory(operator_type: OperatorType) -> Box<dyn Operator>{
     match operator_type{
         OperatorType::Add => Box::new(OperatorAdd::new()),
-        OperatorType::Sub => Box::new(OperatorSub::new())
+        OperatorType::Sub => Box::new(OperatorSub::new()),
+        OperatorType::Error => panic!("Error operator type is used HERE!"),
     }
 }
