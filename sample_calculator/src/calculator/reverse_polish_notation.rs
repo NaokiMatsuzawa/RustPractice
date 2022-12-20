@@ -31,7 +31,7 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn FormulaNode>{
                 }
                 let right = node_deque.pop_back().unwrap();
                 let left = node_deque.pop_back().unwrap();
-                let new_node = Box::new(ReversePolishOperation::new(left, right, operator_type));
+                let new_node = Box::new(FormulaOperationNode::new(left, right, operator_type));
                 node_deque.push_back(new_node);
                 continue;
             }
@@ -46,7 +46,7 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn FormulaNode>{
 
 #[test]
 fn test_invalid_characters(){
-    assert_eq!(calc_from_formula("abc").unwrap_err(), "Invalid Characters");
+            assert_eq!(calc_from_formula("abc").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("a 1 +").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("1 a +").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("a +").unwrap_err(), "Invalid Characters");

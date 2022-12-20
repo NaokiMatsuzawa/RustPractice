@@ -44,15 +44,15 @@ impl FormulaNode for FormulaNumericNode{
     }
 }
 
-pub struct ReversePolishOperation{
+pub struct FormulaOperationNode{
     left : Box<dyn FormulaNode>,
     right: Box<dyn FormulaNode>,
     operator : Box<dyn Operator>
 }
 
-impl ReversePolishOperation{
+impl FormulaOperationNode{
     pub fn new(left : Box<dyn FormulaNode>, right: Box<dyn FormulaNode>, operator_type: OperatorType) -> Self {
-        ReversePolishOperation{
+        FormulaOperationNode{
             left,
             right,
             operator : operator_factory(operator_type),
@@ -60,7 +60,7 @@ impl ReversePolishOperation{
     }
 }
 
-impl FormulaNode for ReversePolishOperation{
+impl FormulaNode for FormulaOperationNode{
     fn calc(&self) -> Result<i32, String> {
         let left_result = self.left.calc();
         let right_result = self.right.calc();
