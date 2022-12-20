@@ -61,6 +61,12 @@ fn test_simple_sub(){
 }
 
 #[test]
+fn test_simple_mul(){
+    assert_eq!(calc_from_formula("* 2 -10").unwrap(), -20); // 2 * -10
+    assert_eq!(calc_from_formula("* -5 -20").unwrap(), 100); // -5 * -20
+}
+
+#[test]
 fn test_complex(){
     assert_eq!(calc_from_formula("+ - 1 2 3").unwrap(), 2);// (1-2)+3
     assert_eq!(calc_from_formula("- + 1 2 3").unwrap(), 0);// (1+2)-3

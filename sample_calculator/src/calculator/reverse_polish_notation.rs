@@ -42,7 +42,7 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn FormulaNode>{
 
 #[test]
 fn test_invalid_characters(){
-            assert_eq!(calc_from_formula("abc").unwrap_err(), "Invalid Characters");
+    assert_eq!(calc_from_formula("abc").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("a 1 +").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("1 a +").unwrap_err(), "Invalid Characters");
     assert_eq!(calc_from_formula("a +").unwrap_err(), "Invalid Characters");
@@ -73,6 +73,12 @@ fn test_simple_add(){
 fn test_simple_sub(){
     assert_eq!(calc_from_formula("1 1 - ").unwrap(), 0); //1 - 1 = 0
     assert_eq!(calc_from_formula("10 100 -").unwrap(), -90); //10 - 100 = -90
+}
+
+#[test]
+fn test_simple_mul(){
+    assert_eq!(calc_from_formula("2 -10 *").unwrap(), -20); // 2 * -10
+    assert_eq!(calc_from_formula("-5 -20 *").unwrap(), 100); // -2 * -10
 }
 
 #[test]
