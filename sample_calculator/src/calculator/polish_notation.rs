@@ -1,32 +1,6 @@
 use super::operator::*;
 use super::formula_node::*;
 
-struct PolishOperation{
-    left : Box<dyn FormulaNode>,
-    right: Box<dyn FormulaNode>,
-    operator : Box<dyn Operator>
-}
-
-
-impl PolishOperation{
-    fn new(notation_str_vec : &mut Vec<&str>, operator_type : OperatorType) -> Self where Self : Sized {
-        let left = polish_notation_factory(notation_str_vec);
-        let right = polish_notation_factory(notation_str_vec);
-        let operator = operator_factory(operator_type);
-        PolishOperation { left, right , operator}
-    }
-}
-
-impl FormulaNode for PolishOperation{
-    fn calc(&self) -> Result<i32, String> {
-        match (self.left.calc(), self.right.calc()){
-            (Ok(left_value), Ok(right_value)) => Ok(self.operator.calc(left_value, right_value)),
-            (Err(e), _) => Err(e),
-            (_, Err(e)) => Err(e)
-        }
-    }
-}
-
 pub fn calc_from_formula(formula: &str) -> Result<i32, String>{
     let formula_string = formula.to_string();
     let mut str_vec = formula_string.split_whitespace().rev().collect();
@@ -55,7 +29,9 @@ pub(crate) fn polish_notation_factory(notation_str_vec : &mut Vec<&str>) -> Box<
             return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters));
         }
     }
-    Box::new(PolishOperation::new(notation_str_vec, operator_type))
+    let left_node = polish_notation_factory(notation_str_vec);
+    let right_node = polish_notation_factory(notation_str_vec);
+    Box::new(FormulaOperationNode::new(left_node, right_node, operator_type))
 }
 
 #[test]
@@ -90,3 +66,10 @@ fn test_simple_sub(){
     assert_eq!(calc_from_formula("- 10 100").unwrap(), -90); //10 - 100 = -90
 }
 
+#[test]
+fn test_complex(){
+    assert_eq!(calc_from_formula("+ - 1 2 3").unwrap(), 2);// (1-2)+3
+    assert_eq!(calc_from_formula("- + 1 2 3").unwrap(), 0);// (1+2)-3
+    assert_eq!(calc_from_formula("+ 1 - 2 3").unwrap(), 0);// (1+(2-3))
+    assert_eq!(calc_from_formula("- 1 + 2 3").unwrap(), -4);// (1-(2+3))
+}
