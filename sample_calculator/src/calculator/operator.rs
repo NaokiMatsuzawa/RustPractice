@@ -32,6 +32,13 @@ impl Operator for OperatorSub{
     }
 }
 
+pub(crate) fn str2operator(str : &str) -> OperatorType{
+    match str{
+        "+" => OperatorType::Add,
+        "-" => OperatorType::Sub,
+        _ => OperatorType::Error,
+    }
+}
 
 pub(crate) fn operator_factory(operator_type: OperatorType) -> Box<dyn Operator>{
     match operator_type{

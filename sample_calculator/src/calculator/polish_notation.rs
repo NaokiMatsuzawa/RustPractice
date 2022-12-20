@@ -17,21 +17,15 @@ pub(crate) fn polish_notation_factory(notation_str_vec : &mut Vec<&str>) -> Box<
         return Box::new(FormulaNumericNode::new(value));
     }
 
-    let operator_type : OperatorType;
-    match str{
-        "+" => {
-            operator_type = OperatorType::Add;
-        }
-        "-" => {
-            operator_type = OperatorType::Sub;
-        } 
-        _ => {
-            return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters));
+    let operator_type = str2operator(&str);
+    match operator_type{
+        OperatorType::Error => return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters)),
+        _ =>{
+            let left_node = polish_notation_factory(notation_str_vec);
+            let right_node = polish_notation_factory(notation_str_vec);
+            Box::new(FormulaOperationNode::new(left_node, right_node, operator_type))
         }
     }
-    let left_node = polish_notation_factory(notation_str_vec);
-    let right_node = polish_notation_factory(notation_str_vec);
-    Box::new(FormulaOperationNode::new(left_node, right_node, operator_type))
 }
 
 #[test]

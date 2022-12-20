@@ -17,11 +17,7 @@ pub(crate) fn formula_factory(formula:&mut Vec<&str>) -> Box<dyn FormulaNode>{
             continue;
         }
 
-        let operator_type = match str{
-            "+" => OperatorType::Add,
-            "-" => OperatorType::Sub,
-            _ => OperatorType::Error,
-        };
+        let operator_type = str2operator(&str);
 
         match operator_type{
             OperatorType::Error => return Box::new(FormulaErrorNode::new(ErrorType::InvalidCharacters)),
