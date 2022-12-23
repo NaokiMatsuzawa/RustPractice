@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use sample_matrix::Matrix;
 use rand::prelude::*;
 
@@ -16,5 +18,5 @@ fn make_rand_matrix<const H: usize, const W: usize>() -> Matrix<u32, H, W>{
 fn main(){
     let matrix_lhs = make_rand_matrix::<400, 400>();
     let matrix_rhs = make_rand_matrix::<400, 400>();
-    let _matrix_ans = matrix_lhs.mul(matrix_rhs);
+    let _matrix_ans = matrix_lhs.mul_mult_thread(Arc::new(matrix_rhs));
 }
