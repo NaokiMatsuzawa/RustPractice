@@ -19,7 +19,7 @@ struct Prototype{
     factory_num : u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Message{
     Click,
 }
@@ -50,13 +50,31 @@ impl Application for Prototype{
     }
 
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
+        match message{
+            Message::Click => self.cookie_num += 1,
+        }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, iced::Renderer<Self::Theme>> {
         let cookie_num_text = text(format!("{}", self.cookie_num)).size(40);
-        let content = column![cookie_num_text].align_items(Alignment::Center)
-                                              .spacing(20);
+        
+        let button = |label|{
+            button(
+                text(label).horizontal_alignment(alignment::Horizontal::Center),
+            )
+            .padding(10)
+            .width(Length::Units(80))
+        };
+
+        let cookie_button = button("Click to earn cookie").on_press(Message::Click);
+
+
+        let content = column![cookie_num_text, cookie_button]
+            .align_items(Alignment::Center)
+            .spacing(20);
+
+
         container(content)
             .width(Length::Fill)
             .height(Length::Fill)
