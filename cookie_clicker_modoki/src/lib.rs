@@ -4,37 +4,23 @@ use cookie::Cookie;
 
 pub mod cookie;
 
-#[derive(Hash, Clone)]
+#[derive(Hash, PartialEq, Eq, Clone)]
 pub enum AutoProduceComponent{
     Cursor,
     Granma,
     Factory,
 }
 
-impl PartialEq for AutoProduceComponent{
-    fn eq(&self, other: &Self) -> bool {
-        self == other
-    }
-}
-
-impl Eq for AutoProduceComponent{}
-
 pub struct CookieProperty{
     cookie : Cookie,
-    //auto_components: HashMap<AutoProduceComponent, u32>,
-    cursor_num : u32,
-    granma_num : u32,
-    factory_num : u32,
+    auto_components: HashMap<AutoProduceComponent, u32>,
 }
 
 impl CookieProperty{
     pub fn new() -> Self{
         CookieProperty {
              cookie: Cookie::new(0), 
-             cursor_num: 0,
-             granma_num: 0,
-             factory_num: 0,
-             //auto_components: HashMap::new(),
+             auto_components: HashMap::new(),
         }
     }
 
@@ -47,19 +33,14 @@ impl CookieProperty{
     }
 
     pub fn product_cookie_by_auto(&mut self){
-        let add_by_granma = Cookie::new(self.granma_num * get_base_product_num(AutoProduceComponent::Granma));
-        let add_by_factory = Cookie::new(self.factory_num * get_base_product_num(AutoProduceComponent::Factory));
-        self.cookie = self.cookie.add(add_by_factory);
-        self.cookie = self.cookie.add(add_by_granma);
+        for (conponent, num) in &self.auto_components{
+            let add_cookie = Cookie::new(num * get_base_product_num(conponent.clone()));
+            self.cookie = self.cookie.add(add_cookie);
+        }
     }
 
     pub fn add_auto_produce_component(&mut self, component : AutoProduceComponent){
-        //self.auto_components.entry(component).and_modify(|num| *num+=1).or_insert(1);
-        match component{
-            AutoProduceComponent::Cursor => self.cursor_num += 1,
-            AutoProduceComponent::Granma => self.granma_num += 1,
-            AutoProduceComponent::Factory => self.factory_num +=1,
-        }
+        self.auto_components.entry(component).and_modify(|num| *num+=1).or_insert(1);
     }
 }
 
