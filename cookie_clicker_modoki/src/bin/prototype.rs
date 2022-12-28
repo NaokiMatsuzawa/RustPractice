@@ -1,11 +1,16 @@
+use std::time::Duration;
+use std::time::Instant;
+
 use iced::Alignment;
 use iced::Application;
 use iced::Command;
 use iced::Length;
 use iced::Settings;
+use iced::Subscription;
 use iced::alignment;
 use iced::executor;
-use iced::theme::{self, Theme};
+use iced::time;
+use iced::theme::{Theme};
 use iced::widget::{button, column, container, row,text};
 
 pub fn main() -> iced::Result{
@@ -15,13 +20,17 @@ pub fn main() -> iced::Result{
 struct Prototype{
     cookie_num : u32,
     auto_clicker_num : u32,
-    grandma_num : u32,
+    granma_num : u32,
     factory_num : u32,
 }
 
 #[derive(Debug, Clone)]
 enum Message{
     Click,
+    AutoClicker,
+    Granma,
+    Factory,
+    AutoEarn(Instant),
 }
 
 impl Application for Prototype{
@@ -38,7 +47,7 @@ impl Application for Prototype{
             Prototype{
                 cookie_num: 0,
                 auto_clicker_num: 0,
-                grandma_num: 0,
+                granma_num: 0,
                 factory_num: 0,
             },
             Command::none(),
@@ -52,6 +61,16 @@ impl Application for Prototype{
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
         match message{
             Message::Click => self.cookie_num += 1,
+            Message::AutoClicker => self.auto_clicker_num += 1,
+            Message::Granma => self.granma_num +=1,
+            Message::Factory => self.factory_num += 1,
+            Message::AutoEarn(_) =>{
+                let mut auto_earn_num = 0;
+                auto_earn_num += self.auto_clicker_num;
+                auto_earn_num += self.granma_num * 5;
+                auto_earn_num += self.factory_num * 100;
+                self.cookie_num += auto_earn_num;
+            },
         }
         Command::none()
     }
@@ -69,8 +88,15 @@ impl Application for Prototype{
 
         let cookie_button = button("Click to earn cookie").on_press(Message::Click);
 
+        let auto_clicker_button = button("Cursor").on_press(Message::AutoClicker);
+        let granma_button = button("Granma").on_press(Message::Granma);
+        let factory_button = button("Factory").on_press(Message::Factory);
 
-        let content = column![cookie_num_text, cookie_button]
+        let get_components_buttons = row![auto_clicker_button, granma_button, factory_button]
+            .align_items(Alignment::Center)
+            .spacing(20);
+
+        let content = column![cookie_num_text, cookie_button, get_components_buttons]
             .align_items(Alignment::Center)
             .spacing(20);
 
@@ -81,5 +107,9 @@ impl Application for Prototype{
             .center_x()
             .center_y()
             .into()                    
+    }
+
+    fn subscription(&self) -> Subscription<Message>{
+        time::every(Duration::from_millis(1000)).map(Message::AutoEarn)
     }
 }
