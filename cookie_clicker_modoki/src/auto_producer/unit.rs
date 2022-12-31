@@ -15,7 +15,7 @@ pub fn producer_factory(component: AutoProduceComponent) -> Box<dyn AutoProducer
 }
 
 fn calc_next_cost(cost : &Cookie) -> Cookie{
-    Cookie::new(cost.amount * 1.15 as u32)
+    Cookie::new(cost.amount * 115 /100)
 }
 
 pub struct CursorUnit{

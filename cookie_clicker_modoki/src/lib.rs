@@ -1,6 +1,4 @@
-use std::{collections::HashMap};
-
-use auto_producer::unit::AutoProducer;
+use auto_producer::{CookieProducer};
 use cookie::Cookie;
 
 pub mod auto_producer;
@@ -15,14 +13,14 @@ pub enum AutoProduceComponent{
 
 pub struct CookieProperty{
     cookie : Cookie,
-    auto_components: HashMap<AutoProduceComponent, Box<dyn AutoProducer>>,
+    cookie_producer: CookieProducer,
 }
 
 impl CookieProperty{
     pub fn new() -> Self{
         CookieProperty {
              cookie: Cookie::new(0), 
-             auto_components: HashMap::new(),
+             cookie_producer: CookieProducer::new(),
         }
     }
 
@@ -31,17 +29,14 @@ impl CookieProperty{
     }
 
     pub fn product_cookie_by_click(&mut self){
-        self.cookie = self.cookie.add(&Cookie::new(1));
+        self.cookie.add(&Cookie::new(1));
     }
 
     pub fn product_cookie_by_auto(&mut self){
-        for (_conponent, producer) in &mut self.auto_components{
-//            let add_cookie = producer.get_product_cookie_num();
-            self.cookie = self.cookie.add(&producer.get_product_cookie_num());
-        }
+        self.cookie.add(&self.cookie_producer.calc_produce_cookie_num());
     }
 
-    pub fn add_auto_produce_component(&mut self, component : AutoProduceComponent){
-        self.auto_components.entry(component.clone()).and_modify(|producer| producer.request_increment_unit_num(&mut self.cookie)).or_insert(auto_producer::unit::producer_factory(component.clone()));
+    pub fn add_auto_produce_component(&mut self, component_label : AutoProduceComponent){
+        self.cookie_producer.buy_unit(&mut self.cookie, component_label)
     }
 }

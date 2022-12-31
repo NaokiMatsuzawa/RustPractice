@@ -7,12 +7,12 @@ impl Cookie{
         Cookie{amount}
     }
 
-    pub fn add(&self, other : &Cookie) -> Self{
-        Cookie{amount: self.amount + other.amount}
+    pub fn add(&mut self, rhs : &Cookie) {
+        self.amount += rhs.amount;
     }
 
-    pub fn decrease(&mut self, other : &Cookie){
-        self.amount -= other.amount;
+    pub fn decrease(&mut self, rhs : &Cookie){
+        self.amount -= rhs.amount;
     }
 
     pub fn is_more(&self, rhs: &Cookie) -> bool{
