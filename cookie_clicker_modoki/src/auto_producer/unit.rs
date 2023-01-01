@@ -3,7 +3,7 @@ use crate::{cookie::Cookie, AutoProduceComponent};
 pub trait AutoProducer{
     fn calc_cps(&self) -> f64;
     fn get_product_cookie_num(&mut self) -> Cookie;
-    fn request_increment_unit_num(&mut self, wallet : &mut Cookie);
+    fn request_increment_unit_num(&mut self);
 }
 
 pub fn producer_factory(component: AutoProduceComponent) -> Box<dyn AutoProducer>{
@@ -14,22 +14,17 @@ pub fn producer_factory(component: AutoProduceComponent) -> Box<dyn AutoProducer
     }
 }
 
-fn calc_next_cost(cost : &Cookie) -> Cookie{
-    Cookie::new(cost.amount * 115 /100)
-}
 
 pub struct CursorUnit{
     unit_num : u32,
     cookie_count_as_f64 : f64,
-    require_cookies_to_buy : Cookie,
 }
 
 impl CursorUnit{
     pub fn new() -> Self{
         CursorUnit{
-            unit_num : 0,
+            unit_num : 1,
             cookie_count_as_f64 : 0.0,
-            require_cookies_to_buy : Cookie::new(10),
         }
     }
 }
@@ -52,12 +47,7 @@ impl AutoProducer for CursorUnit{
         Cookie::new(cookie_num)
     }
 
-    fn request_increment_unit_num(&mut self, wallet : &mut Cookie) {
-        if self.require_cookies_to_buy.is_more(wallet) {
-            return;
-        }
-        wallet.decrease(&self.require_cookies_to_buy);
-        self.require_cookies_to_buy = calc_next_cost(&self.require_cookies_to_buy);
+    fn request_increment_unit_num(&mut self) {
         self.unit_num += 1;
     }
 
@@ -66,15 +56,13 @@ impl AutoProducer for CursorUnit{
 pub struct GranmaUnit{
     unit_num : u32,
     cookie_count_as_f64 : f64,
-    require_cookies_to_buy : Cookie,
 }
 
 impl GranmaUnit{
     pub fn new() -> Self{
         GranmaUnit{
-            unit_num : 0,
+            unit_num : 1,
             cookie_count_as_f64 : 0.0,
-            require_cookies_to_buy : Cookie::new(100),
         }
     }
 }
@@ -83,7 +71,7 @@ impl AutoProducer for GranmaUnit{
     fn calc_cps(&self) -> f64 {
         1.0
     }
-
+    
     fn get_product_cookie_num(&mut self) -> Cookie {
         self.cookie_count_as_f64 += self.calc_cps() * self.unit_num as f64;
         let cookie_num = if self.cookie_count_as_f64 >= 1.0 {
@@ -96,30 +84,23 @@ impl AutoProducer for GranmaUnit{
         };
         Cookie::new(cookie_num)
     }
-
-    fn request_increment_unit_num(&mut self, wallet : &mut Cookie) {
-        if self.require_cookies_to_buy.is_more(wallet){
-            return;
-        }
-        wallet.decrease(&self.require_cookies_to_buy);
-        self.require_cookies_to_buy = calc_next_cost(&self.require_cookies_to_buy);
+    
+    fn request_increment_unit_num(&mut self) {
         self.unit_num += 1;
     }
-
+    
 }
 
 pub struct FactoryUnit{
     unit_num : u32,
     cookie_count_as_f64 : f64,
-    require_cookies_to_buy : Cookie,
 }
 
 impl FactoryUnit{
     pub fn new() -> Self{
         FactoryUnit{
-            unit_num : 0,
+            unit_num : 1,
             cookie_count_as_f64 : 0.0,
-            require_cookies_to_buy : Cookie::new(1000),
         }
     }
 }
@@ -128,7 +109,7 @@ impl AutoProducer for FactoryUnit{
     fn calc_cps(&self) -> f64 {
         100.0
     }
-
+    
     fn get_product_cookie_num(&mut self) -> Cookie {
         self.cookie_count_as_f64 += self.calc_cps() * self.unit_num as f64;
         let cookie_num = if self.cookie_count_as_f64 >= 1.0 {
@@ -141,14 +122,8 @@ impl AutoProducer for FactoryUnit{
         };
         Cookie::new(cookie_num)
     }
-
-    fn request_increment_unit_num(&mut self, wallet : &mut Cookie) {
-        if self.require_cookies_to_buy.is_more(wallet){
-            return;
-        }
-        wallet.decrease(&self.require_cookies_to_buy);
-        self.require_cookies_to_buy = calc_next_cost(&self.require_cookies_to_buy);
+    
+    fn request_increment_unit_num(&mut self) {
         self.unit_num += 1;
     }
-
 }

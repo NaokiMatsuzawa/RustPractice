@@ -4,7 +4,7 @@ use cookie::Cookie;
 pub mod auto_producer;
 pub mod cookie;
 
-#[derive(Hash, PartialEq, Eq, Clone)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy)]
 pub enum AutoProduceComponent{
     Cursor,
     Granma,
