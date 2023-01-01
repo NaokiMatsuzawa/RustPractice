@@ -21,11 +21,12 @@ pub fn main() -> iced::Result{
 
 #[derive(Debug, Clone)]
 enum Message{
-    Click,
+    Click(u32),
     AutoClicker,
     Granma,
     Factory,
     AutoEarn(Instant),
+
 }
 
 struct CookiePropertyForGame{
@@ -56,7 +57,11 @@ impl Application for CookiePropertyForGame{
 
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
         match message{
-            Message::Click => self.cookie_property.product_cookie_by_click(),
+            Message::Click(click_num) =>{
+                for _ in 0..click_num{
+                    self.cookie_property.product_cookie_by_click();
+                }
+            },
             Message::AutoClicker => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Cursor),
             Message::Granma => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Granma),
             Message::Factory => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Factory),
@@ -78,7 +83,9 @@ impl Application for CookiePropertyForGame{
             .width(Length::Units(80))
         };
 
-        let cookie_button = button("Click to earn cookie").on_press(Message::Click);
+        let cookie_button = button("Click to earn cookie").on_press(Message::Click(1));
+        let cookie_button_100times = button("Click to earn cookie 100 times").on_press(Message::Click(100));
+
 
         let auto_clicker_button = button("Cursor").on_press(Message::AutoClicker);
         let granma_button = button("Granma").on_press(Message::Granma);
@@ -88,7 +95,7 @@ impl Application for CookiePropertyForGame{
             .align_items(Alignment::Center)
             .spacing(20);
 
-        let content = column![cookie_num_text, cookie_button, get_components_buttons]
+        let content = column![cookie_num_text, cookie_button, cookie_button_100times, get_components_buttons]
             .align_items(Alignment::Center)
             .spacing(20);
 
