@@ -37,6 +37,15 @@ impl CookieProperty{
         self.cookie.add(add_num);
     }
 
+    //μs単位
+    pub fn calc_duration_to_product_single_cookie(&self) -> u64{
+        (1000000.0 / self.cookie_producer.calc_cps()) as u64
+    }
+
+    pub fn product_single_cookie(&mut self){
+        self.cookie.add(Cookie::new(1));
+    }
+
     pub fn add_auto_produce_component(&mut self, component_label : AutoProduceComponent){
         self.cookie_producer.buy_unit(&mut self.cookie, component_label)
     }

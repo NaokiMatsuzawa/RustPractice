@@ -66,7 +66,7 @@ impl Application for CookiePropertyForGame{
             Message::Granma => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Granma),
             Message::Factory => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Factory),
             Message::AutoEarn(_) =>{
-                self.cookie_property.product_cookie_by_auto();
+                self.cookie_property.product_single_cookie();
             },
         }
         Command::none()
@@ -109,6 +109,6 @@ impl Application for CookiePropertyForGame{
     }
 
     fn subscription(&self) -> Subscription<Message>{
-        time::every(Duration::from_millis(1000)).map(Message::AutoEarn)
+        time::every(Duration::from_micros(self.cookie_property.calc_duration_to_product_single_cookie())).map(Message::AutoEarn)
     }
 }
