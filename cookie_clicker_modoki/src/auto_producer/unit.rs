@@ -1,12 +1,11 @@
 use crate::auto_producer::calc_cps::*;
 
-use crate::{cookie::Cookie, AutoProduceComponent};
+use crate::{AutoProduceComponent};
 
 use super::CookieProducer;
 
 pub trait AutoProducer{
     fn calc_cps(&self, producer : &CookieProducer) -> f64;
-    fn get_product_cookie_num(&self, producer: &CookieProducer) -> Cookie;
     fn request_increment_unit_num(&mut self);
     fn get_units_num(&self) -> u32;
 }
@@ -24,7 +23,7 @@ fn calc_base_cps(component_id : AutoProduceComponent) -> f64{
     }
 }
 
-pub struct ProducerUnit{
+struct ProducerUnit{
     unit_num : u32,
     cps_calculator : Box<dyn CalcCps>,
 }
@@ -36,39 +35,17 @@ impl ProducerUnit{
             cps_calculator: calculator,
         }
     }
+
+    fn calc_cps_per_unit(&self, producer: &CookieProducer) -> f64 {
+        self.cps_calculator.calc_cps(producer)
+    }   
 }
 
 impl AutoProducer for ProducerUnit{
-    fn calc_cps(&self, producer: &CookieProducer) -> f64 {
-        self.cps_calculator.calc_cps(producer)
-    }   
-
-    fn get_product_cookie_num(&self, producer: &CookieProducer) -> Cookie{
-        let cookie_count_as_f64 = self.calc_cps(producer) * self.unit_num as f64;
-        let cookie_num = if cookie_count_as_f64 >= 1.0 {
-            let floor = cookie_count_as_f64.floor();
-            floor as u32
-        }
-        else{
-            0
-        };
-        Cookie::new(cookie_num)
+    fn calc_cps(&self, producer: &CookieProducer) -> f64{
+        self.calc_cps_per_unit(producer) * self.unit_num as f64
     }
 
-    /*
-    fn get_product_cookie_num(&mut self, producer: &CookieProducer) -> Cookie {
-        self.cookie_count_as_f64 += self.calc_cps(producer) * self.unit_num as f64;
-        let cookie_num = if self.cookie_count_as_f64 >= 1.0 {
-            let floor = self.cookie_count_as_f64.floor();
-            self.cookie_count_as_f64 -= floor;
-            floor as u32
-        }
-        else{
-            0
-        };
-        Cookie::new(cookie_num)
-    }
-*/
     fn request_increment_unit_num(&mut self) {
         self.unit_num += 1;
     }
