@@ -15,6 +15,8 @@ use iced::time;
 use iced::theme::{Theme};
 use iced::widget::{button, column, container, row,text};
 
+static FPS : u64 = 30;
+
 pub fn main() -> iced::Result{
     CookiePropertyForGame::run(Settings::default())
 }
@@ -26,7 +28,7 @@ enum Message{
     Granma,
     Factory,
     AutoEarn(Instant),
-
+    AutoEarnSingle(Instant),
 }
 
 struct CookiePropertyForGame{
@@ -66,8 +68,9 @@ impl Application for CookiePropertyForGame{
             Message::Granma => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Granma),
             Message::Factory => self.cookie_property.add_auto_produce_component(AutoProduceComponent::Factory),
             Message::AutoEarn(_) =>{
-                self.cookie_property.product_single_cookie();
+                self.cookie_property.product_cookie_by_auto(FPS);
             },
+            Message::AutoEarnSingle(_) => self.cookie_property.product_single_cookie(),
         }
         Command::none()
     }
@@ -109,6 +112,16 @@ impl Application for CookiePropertyForGame{
     }
 
     fn subscription(&self) -> Subscription<Message>{
-        time::every(Duration::from_micros(self.cookie_property.calc_duration_to_product_single_cookie())).map(Message::AutoEarn)
+        //todo
+        //1個生成するのに必要な時間がめちゃくちゃ短くなったら、処理を再考するひつようがある。
+        let single_sec_in_micro = 1_000_000;
+        let single_frame_in_micro = single_sec_in_micro / FPS;
+        let duration_to_produce_single_cookie = self.cookie_property.calc_duration_to_product_single_cookie();
+        if duration_to_produce_single_cookie > single_frame_in_micro {
+            time::every(Duration::from_micros(duration_to_produce_single_cookie)).map(Message::AutoEarnSingle)
+        }
+        else{
+            time::every(Duration::from_micros(single_frame_in_micro)).map(Message::AutoEarn)
+        }
     }
 }

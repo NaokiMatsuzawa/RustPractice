@@ -1,5 +1,5 @@
 use auto_producer::{CookieProducer};
-use cookie::Cookie;
+use cookie::*;
 
 pub mod auto_producer;
 pub mod cookie;
@@ -32,8 +32,9 @@ impl CookieProperty{
         self.cookie.add(Cookie::new(1));
     }
 
-    pub fn product_cookie_by_auto(&mut self){
-        let add_num = Cookie::new(self.cookie_producer.calc_cps() as u32);
+    pub fn product_cookie_by_auto(&mut self, fps : u64){
+        let cpf = self.cookie_producer.calc_cps() / fps as f64;
+        let add_num = f64_to_cookie(cpf);
         self.cookie.add(add_num);
     }
 
