@@ -1,4 +1,5 @@
 pub mod unit;
+mod calc_cps;
 
 use std::collections::HashMap;
 use crate::cookie::Cookie;
@@ -35,12 +36,22 @@ impl CookieProducer{
 
     }
 
-    pub fn calc_produce_cookie_num(&mut self) -> Cookie{
+    pub fn calc_produce_cookie_num(&self) -> Cookie{
         let mut produce_cookie_num = Cookie::new(0);
-        for (_conponent, producer) in &mut self.auto_components{
-            produce_cookie_num.add(&producer.get_product_cookie_num());
+        for (_conponent, producer) in &self.auto_components{
+            let a = producer.get_product_cookie_num(&self);
+            produce_cookie_num.add(a);
         }
         produce_cookie_num
+    }
+
+    pub fn get_units_num(&self, component_label : AutoProduceComponent) -> u32{
+        match self.auto_components.get(&component_label){
+            Some(p) =>{
+                p.get_units_num()
+            },
+            None => 0,
+        }
     }
 }
 

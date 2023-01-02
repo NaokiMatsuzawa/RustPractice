@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct Cookie{
     pub amount: u32,
 }
@@ -7,7 +8,7 @@ impl Cookie{
         Cookie{amount}
     }
 
-    pub fn add(&mut self, rhs : &Cookie) {
+    pub fn add(&mut self, rhs : Cookie) {
         self.amount += rhs.amount;
     }
 

@@ -29,11 +29,11 @@ impl CookieProperty{
     }
 
     pub fn product_cookie_by_click(&mut self){
-        self.cookie.add(&Cookie::new(1));
+        self.cookie.add(Cookie::new(1));
     }
 
     pub fn product_cookie_by_auto(&mut self){
-        self.cookie.add(&self.cookie_producer.calc_produce_cookie_num());
+        self.cookie.add(self.cookie_producer.calc_produce_cookie_num());
     }
 
     pub fn add_auto_produce_component(&mut self, component_label : AutoProduceComponent){
