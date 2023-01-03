@@ -33,14 +33,14 @@ impl CookieProperty{
     }
 
     pub fn product_cookie_by_auto(&mut self, fps : u64){
-        let cpf = self.cookie_producer.calc_cps() / fps as f64;
-        let add_num = f64_to_cookie(cpf);
-        self.cookie.add(add_num);
+        let mut cpf = self.cookie_producer.calc_cps();
+        cpf.div_by_u32(fps as u32);
+        self.cookie.add(cpf);
     }
 
     //μs単位
     pub fn calc_duration_to_product_single_cookie(&self) -> u64{
-        (1000000.0 / self.cookie_producer.calc_cps()) as u64
+        (1000000.0 / self.cookie_producer.calc_cps().to_f64()) as u64
     }
 
     pub fn product_single_cookie(&mut self){

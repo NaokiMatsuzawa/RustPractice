@@ -1,11 +1,12 @@
 use crate::auto_producer::calc_cps::*;
 
+use crate::cookie::*;
 use crate::{AutoProduceComponent};
 
 use super::CookieProducer;
 
 pub trait AutoProducer{
-    fn calc_cps(&self, producer : &CookieProducer) -> f64;
+    fn calc_cps(&self, producer : &CookieProducer) -> Cookie;
     fn request_increment_unit_num(&mut self);
     fn get_units_num(&self) -> u32;
 }
@@ -42,8 +43,9 @@ impl ProducerUnit{
 }
 
 impl AutoProducer for ProducerUnit{
-    fn calc_cps(&self, producer: &CookieProducer) -> f64{
-        self.calc_cps_per_unit(producer) * self.unit_num as f64
+    fn calc_cps(&self, producer: &CookieProducer) -> Cookie{
+        let cps_as_f64 = self.calc_cps_per_unit(producer) * self.unit_num as f64;
+        f64_to_cookie(cps_as_f64)
     }
 
     fn request_increment_unit_num(&mut self) {

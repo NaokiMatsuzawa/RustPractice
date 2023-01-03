@@ -41,10 +41,10 @@ impl CookieProducer {
             .or_insert(unit::producer_factory(component_label.clone()));
     }
 
-    pub fn calc_cps(&self) -> f64 {
-        let mut sum_cps = 0.0;
+    pub fn calc_cps(&self) -> Cookie {
+        let mut sum_cps = Cookie::new(0);
         for (_conponent, producer) in &self.auto_components {
-            sum_cps += producer.calc_cps(&self);
+            sum_cps.add(producer.calc_cps(&self));
             
         }
         sum_cps

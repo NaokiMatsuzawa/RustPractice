@@ -30,6 +30,18 @@ impl Cookie{
         //ただ0以外でも特に大きな問題はないのでそのまま
         self.amount >= rhs.amount
     }
+
+    pub fn div_by_u32(&mut self, rhs: u32){
+        self.cookie_piece += (self.amount % rhs) as f64;
+        self.amount /= rhs;
+        self.cookie_piece /= rhs as f64;
+    }
+
+    pub fn to_f64(&self) -> f64{
+        let mut value = self.cookie_piece;
+        value += self.amount as f64;
+        value
+    }
 }
 
 pub fn f64_to_cookie(value: f64) -> Cookie{
