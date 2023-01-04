@@ -1,3 +1,5 @@
+use std::io;
+
 use rand::prelude::*;
 
 fn main() {
@@ -6,6 +8,8 @@ fn main() {
     const BOMB_NUM : usize= 10;
 
     let mut field = [[0; WIDTH];HEIGHT];
+    let mut field_is_open = [[false; WIDTH];HEIGHT];
+
     let mut field_sub = [[0; WIDTH + 2]; HEIGHT + 2];
 
     let mut rng = rand::thread_rng();
@@ -39,11 +43,44 @@ fn main() {
         }
     }
 
-    for y in 0..HEIGHT{
-        for x in 0..WIDTH{
-            print!("{}", field[y][x]);
+    let stdin = io::stdin();
+
+    loop{
+        for y in 0..HEIGHT{
+            for x in 0..WIDTH{
+                if field_is_open[y][x]{
+                    print!("{}", field[y][x]);
+                }
+                else{
+                    print!(" ");
+                }
+            }
+            println!();
         }
-        println!();
+        println!("Input 2 Integers");
+        //入力を受け付ける
+
+        let input_x: usize;
+        let input_y;
+
+        let mut line = String::from("");
+        stdin.read_line(&mut line).expect("ERROR");
+        
+        let splited_line : Vec<&str> = line.split_whitespace().collect();
+        input_x = usize::from_str_radix(splited_line[0],10).unwrap();
+        input_y = usize::from_str_radix(splited_line[1], 10).unwrap();
+        
+
+        if field_is_open[input_y][input_x]{
+            continue;
+        }
+
+        field_is_open[input_y][input_x] = true;
+        if field[input_y][input_x] == 9 {
+            println!("BOMB!");
+            println!("GAMEOVER");
+            break;
+        }
     }
 
     
