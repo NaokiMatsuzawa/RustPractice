@@ -46,9 +46,9 @@ fn print_game_board(board : &minesweeper::game_logic::FieldBoard){
 
 fn grid_id_to_str(id: game_logic::GridID) -> String{
     match id{
-        game_logic::BOMB_ID => "B".to_string(),
-        game_logic::UNOPEN_ID => "*".to_string(),
-        _ => u32::to_string(&id)
+        game_logic::GridID::BOMB => "B".to_string(),
+        game_logic::GridID::UNOPEN => "*".to_string(),
+        game_logic::GridID::NUMBER(num) => u32::to_string(&num)
     }
 }
 

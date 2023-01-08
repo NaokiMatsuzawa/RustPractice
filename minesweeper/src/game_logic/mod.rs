@@ -1,7 +1,12 @@
 use rand::seq::SliceRandom;
-pub type GridID = u32;
-pub const UNOPEN_ID: GridID = 999;
-pub const BOMB_ID: GridID = 9;
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum GridID{
+    BOMB,
+    NUMBER(u32),
+
+    UNOPEN,
+}
 
 #[derive(Clone)]
 struct FieldGrid {
@@ -12,12 +17,12 @@ struct FieldGrid {
 impl FieldGrid {
     fn new() -> FieldGrid {
         FieldGrid {
-            grid_id: 0,
+            grid_id: GridID::UNOPEN,
             is_open: false,
         }
     }
 
-    pub fn set_grid_id(&mut self, id: u32) {
+    pub fn set_grid_id(&mut self, id: GridID) {
         self.grid_id = id;
     }
 }
@@ -35,8 +40,8 @@ impl FieldBoard {
         let mut grids = vec![FieldGrid::new(); grid_num];
         let cw: usize = width + 2;
         let ch: usize = height + 2;
-        let mut grids_only_id = vec![vec![0; width]; height];
-        let mut grids_complement = vec![vec![0; cw]; ch];
+        let mut grids_only_id = vec![vec![GridID::NUMBER(0); width]; height];
+        let mut grids_complement = vec![vec![GridID::NUMBER(0); cw]; ch];
 
         let mut nums: Vec<usize> = (0..grid_num).collect();
         let mut rand = rand::thread_rng();
@@ -46,8 +51,8 @@ impl FieldBoard {
             let grid_index = nums.get(i).unwrap();
             let x = grid_index % width;
             let y = grid_index / width;
-            grids_only_id[y][x] = BOMB_ID;
-            grids_complement[y + 1][x + 1] = BOMB_ID;
+            grids_only_id[y][x] = GridID::BOMB;
+            grids_complement[y + 1][x + 1] = GridID::BOMB;
         }
 
         let field_vec = [
@@ -63,7 +68,7 @@ impl FieldBoard {
 
         for y in 0..height {
             for x in 0..width {
-                if grids_only_id[y][x] == BOMB_ID {
+                if grids_only_id[y][x] == GridID::BOMB {
                     continue;
                 }
                 let y_sub: i32 = y as i32 + 1;
@@ -71,12 +76,12 @@ impl FieldBoard {
                 let mut surround_bomb_num = 0;
                 for vector in &field_vec {
                     if grids_complement[(y_sub + vector.0) as usize][(x_sub + vector.1) as usize]
-                        == BOMB_ID
+                        == GridID::BOMB
                     {
                         surround_bomb_num += 1;
                     }
                 }
-                grids_only_id[y][x] = surround_bomb_num;
+                grids_only_id[y][x] = GridID::NUMBER(surround_bomb_num);
             }
         }
 
@@ -98,7 +103,7 @@ impl FieldBoard {
 
     pub fn is_gameover(&self) -> bool {
         for grid in &self.grids {
-            if grid.grid_id == BOMB_ID && grid.is_open == true {
+            if grid.grid_id == GridID::BOMB && grid.is_open == true {
                 return true;
             }
         }
@@ -107,7 +112,7 @@ impl FieldBoard {
 
     pub fn is_clear(&self) -> bool {
         for grid in &self.grids {
-            if grid.grid_id != BOMB_ID && !grid.is_open {
+            if grid.grid_id != GridID::BOMB && !grid.is_open {
                 return false;
             }
         }
@@ -129,7 +134,7 @@ impl FieldBoard {
 
         grid.is_open = true;
 
-        if grid.grid_id == 0 {
+        if grid.grid_id == GridID::NUMBER(0) {
             if x > 0 {
                 self.request_open(x - 1, y);
             }
@@ -158,7 +163,7 @@ impl FieldBoard {
         if self.is_open(x, y) {
             return self.get_grid(x, y).grid_id;
         }
-        UNOPEN_ID
+        GridID::UNOPEN
     }
 
     pub fn get_width(&self) -> usize {
