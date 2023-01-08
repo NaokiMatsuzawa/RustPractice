@@ -31,6 +31,9 @@ pub struct FieldBoard {
     grids: Vec<FieldGrid>,
     width: usize,
     height: usize,
+
+    is_bomb_placed : bool,
+    bomb_num : u32,
 }
 
 impl FieldBoard {
@@ -38,29 +41,42 @@ impl FieldBoard {
         let grid_num = width * height;
         let grids = vec![FieldGrid::new(); grid_num];
 
-        let mut field = FieldBoard {
+        let field = FieldBoard {
             grids,
             width,
             height,
+            is_bomb_placed : false,
+            bomb_num,
         };
-        field.make_field(bomb_num);
         field
     }
 
-    fn make_field(&mut self, bomb_num : u32){
-        let grid_num = self.width * self.height;
+    fn place_bomb(&mut self, except_x_pos : usize, except_y_pos : usize){
+        if self.is_bomb_placed{
+            assert!(false);
+            return;
+        }
 
+        let grid_num = self.width * self.height;
 
         let cw: usize = self.width + 2;
         let ch: usize = self.height + 2;
         let mut grids_only_id = vec![vec![GridID::NUMBER(0); self.width]; self.height];
         let mut grids_complement = vec![vec![GridID::NUMBER(0); cw]; ch];
 
-        let mut nums: Vec<usize> = (0..grid_num).collect();
+        let mut nums: Vec<usize> = vec![];
+        let except_num = except_x_pos + except_y_pos * self.width;
+
+        for i in 0..grid_num{
+            if i == except_num{
+                continue;
+            }
+            nums.push(i);
+        }
         let mut rand = rand::thread_rng();
         nums.shuffle(&mut rand);
 
-        for i in 0..bomb_num as usize {
+        for i in 0..self.bomb_num as usize {
             let grid_index = nums.get(i).unwrap();
             let x = grid_index % self.width;
             let y = grid_index / self.width;
@@ -106,6 +122,8 @@ impl FieldBoard {
                     .set_grid_id(grids_only_id[y][x]);
             }
         }
+
+        self.is_bomb_placed = true;
     }
 
     pub fn is_gameover(&self) -> bool {
@@ -127,6 +145,9 @@ impl FieldBoard {
     }
 
     pub fn request_open(&mut self, x: usize, y: usize) {
+        if !self.is_bomb_placed{
+            self.place_bomb(x, y)
+        }
         if x >= self.width {
             return;
         }
