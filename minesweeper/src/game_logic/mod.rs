@@ -36,11 +36,24 @@ pub struct FieldBoard {
 impl FieldBoard {
     pub fn new(width: usize, height: usize, bomb_num: u32) -> FieldBoard {
         let grid_num = width * height;
+        let grids = vec![FieldGrid::new(); grid_num];
 
-        let mut grids = vec![FieldGrid::new(); grid_num];
-        let cw: usize = width + 2;
-        let ch: usize = height + 2;
-        let mut grids_only_id = vec![vec![GridID::NUMBER(0); width]; height];
+        let mut field = FieldBoard {
+            grids,
+            width,
+            height,
+        };
+        field.make_field(bomb_num);
+        field
+    }
+
+    fn make_field(&mut self, bomb_num : u32){
+        let grid_num = self.width * self.height;
+
+
+        let cw: usize = self.width + 2;
+        let ch: usize = self.height + 2;
+        let mut grids_only_id = vec![vec![GridID::NUMBER(0); self.width]; self.height];
         let mut grids_complement = vec![vec![GridID::NUMBER(0); cw]; ch];
 
         let mut nums: Vec<usize> = (0..grid_num).collect();
@@ -49,8 +62,8 @@ impl FieldBoard {
 
         for i in 0..bomb_num as usize {
             let grid_index = nums.get(i).unwrap();
-            let x = grid_index % width;
-            let y = grid_index / width;
+            let x = grid_index % self.width;
+            let y = grid_index / self.width;
             grids_only_id[y][x] = GridID::BOMB;
             grids_complement[y + 1][x + 1] = GridID::BOMB;
         }
@@ -66,8 +79,8 @@ impl FieldBoard {
             (1, 1),
         ];
 
-        for y in 0..height {
-            for x in 0..width {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if grids_only_id[y][x] == GridID::BOMB {
                     continue;
                 }
@@ -85,19 +98,13 @@ impl FieldBoard {
             }
         }
 
-        for y in 0..height {
-            for x in 0..width {
-                grids
-                    .get_mut(y * width + x)
+        for y in 0..self.height {
+            for x in 0..self.width {
+                self.grids
+                    .get_mut(y * self.width + x)
                     .unwrap()
                     .set_grid_id(grids_only_id[y][x]);
             }
-        }
-
-        FieldBoard {
-            grids,
-            width,
-            height,
         }
     }
 
@@ -126,8 +133,7 @@ impl FieldBoard {
         if y >= self.height {
             return;
         }
-        let index = x + y * self.width;
-        let mut grid = self.grids.get_mut(index).expect("out of range : GRIDS");
+        let mut grid = self.get_grid_mut(x, y);
         if grid.is_open {
             return;
         }
@@ -147,7 +153,24 @@ impl FieldBoard {
             if y < self.height - 1 {
                 self.request_open(x, y + 1);
             }
+            if x > 0 && y > 0{
+                self.request_open(x - 1, y - 1);
+            }
+            if x < self.width - 1  && y > 0{
+                self.request_open(x + 1, y - 1);
+            }
+            if x > 0 && y < self.height - 1{
+                self.request_open(x - 1, y + 1);
+            }
+            if x < self.width - 1 && y < self.height - 1{
+                self.request_open(x + 1, y + 1);
+            }
         }
+    }
+
+    fn get_grid_mut(&mut self, x:usize, y:usize) ->&mut FieldGrid{
+        let index = x + y * self.width;
+        self.grids.get_mut(index).expect("out of range : GRIDS")
     }
 
     fn get_grid(&self, x: usize, y: usize) -> &FieldGrid {
