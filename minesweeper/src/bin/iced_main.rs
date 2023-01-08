@@ -41,8 +41,9 @@ impl Application for IcedApplication{
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
         match message{
             Message::ClickReset => todo!(),
-            Message::ClickField(x, y) => todo!(),
+            Message::ClickField(x, y) => self.game_field.request_open(x, y),
         }
+        Command::none()
     }
 
     fn view(&self) -> iced::Element<Message> {
@@ -60,13 +61,14 @@ impl Application for IcedApplication{
         for y in 0..height{
             let mut column_buttons = row![];
             for x in 0..width{
-                let button = button(" ").on_press(Message::ClickField(x, y));
+                let str = grid_id_to_str(self.game_field.get_grid_id(x, y));
+                let button = button(str).on_press(Message::ClickField(x, y)).width(Length::from(20));
                 column_buttons = column_buttons.push(button);
             }
             field_buttons = field_buttons.push(column_buttons);
         }
 
-        let content = iced::widget::column![reset_button, field_buttons];
+        let content = iced::widget::column![reset_button, field_buttons].spacing(20);
 
         container(content)
             .width(Length::Fill)
@@ -77,3 +79,16 @@ impl Application for IcedApplication{
         
     }
 }
+
+
+const BOMB_STR : &str = "B";
+const UNOPEN_STR : &str = " ";
+const NUMBER_STR : [&'static str ; 9] = ["0","1","2","3","4","5","6","7","8"];
+fn grid_id_to_str(id: minesweeper::game_logic::GridID) -> &'static str{
+    match id{
+        minesweeper::game_logic::GridID::BOMB => BOMB_STR,
+        minesweeper::game_logic::GridID::UNOPEN => UNOPEN_STR,
+        minesweeper::game_logic::GridID::NUMBER(num) => NUMBER_STR[num as usize],
+    }
+}
+
